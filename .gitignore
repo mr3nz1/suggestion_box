@@ -3,4 +3,4 @@ target/
 *.iml
 offline/*.tar
 .m2repo
-# .m2repo is intentionally committed: it makes the Docker build work offline.
+offline
