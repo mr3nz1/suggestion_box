@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <title>Student Suggestion Box</title>
+    <meta charset="UTF-8"/>
+    <!-- 1. EXTERNAL CSS -->
+    <h:outputStylesheet library="css" name="app.css"/>
+    <ui:insert name="pageStyle"/>
+</h:head>
+
+<h:body>
+    <div class="topbar">
+        <h1>Student Suggestion Box</h1>
+        <h:link outcome="/index" value="Home"/>
+        <h:link outcome="/categories" value="Categories"/>
+        <h:link outcome="/suggestions" value="Suggestions"/>
+    </div>
+
+    <div class="page">
+        <h:messages id="globalMessages" styleClass="messages"
+                    infoClass="info" errorClass="error" fatalClass="fatal"
+                    globalOnly="true" layout="list"/>
+        <ui:insert name="content"/>
+    </div>
+</h:body>
+</html>

@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: suggestionbox-db
+    pull_policy: missing          # never reach out to a registry if the image is local
+    environment:
+      POSTGRES_DB: suggestionbox
+      POSTGRES_USER: suggestion
+      POSTGRES_PASSWORD: suggestion
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U suggestion -d suggestionbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      pull: false               # use the local base images, do not check the registry
+    image: suggestionbox-app:1.0
+    container_name: suggestionbox-app
+    pull_policy: missing
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/suggestionbox
+      DB_USER: suggestion
+      DB_PASSWORD: suggestion
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

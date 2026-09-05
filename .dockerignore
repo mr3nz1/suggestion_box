@@ -1,0 +1,6 @@
+target/
+docs/
+offline/
+.git/
+*.iml
+.idea/

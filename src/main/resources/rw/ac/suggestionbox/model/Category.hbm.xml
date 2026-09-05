@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="rw.ac.suggestionbox.model">
+
+    <class name="Category" table="categories">
+        <id name="id" column="id" type="long">
+            <generator class="identity"/>
+        </id>
+        <property name="name" column="name" type="string" length="60" not-null="true" unique="true"/>
+        <property name="description" column="description" type="string" length="255"/>
+        <property name="active" column="active" type="boolean" not-null="true"/>
+    </class>
+
+</hibernate-mapping>

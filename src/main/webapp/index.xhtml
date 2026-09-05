@@ -1,0 +1,23 @@
+<ui:composition template="/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="card">
+            <h2>Welcome</h2>
+            <!-- 3. INLINE CSS -->
+            <p style="margin:0 0 10px 0; line-height:1.5;">
+                A minimal Jakarta EE application where students post suggestions and staff
+                manage them. Two entities support full CRUD: <strong>Category</strong> and
+                <strong>Suggestion</strong>.
+            </p>
+            <p style="margin:0;">
+                <h:link outcome="/categories" value="Manage Categories" styleClass="btn"
+                        style="text-decoration:none; display:inline-block;"/>
+                <h:link outcome="/suggestions" value="Manage Suggestions" styleClass="btn"
+                        style="text-decoration:none; display:inline-block; margin-left:8px;"/>
+            </p>
+        </div>
+    </ui:define>
+</ui:composition>

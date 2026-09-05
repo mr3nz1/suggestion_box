@@ -1,0 +1,160 @@
+<ui:composition template="/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:pt="jakarta.faces.passthrough">
+
+    <!-- 2. INTERNAL CSS (page specific) -->
+    <ui:define name="pageStyle">
+        <style type="text/css">
+            .status              { font-size: 12px; padding: 2px 6px; border: 1px solid #b9bfc9; }
+            .status-NEW          { background: #eef3fb; }
+            .status-UNDER_REVIEW { background: #fdf6e3; }
+            .status-ACCEPTED     { background: #eaf6ec; }
+            .status-REJECTED     { background: #fbeeee; }
+            .filter-bar          { margin-bottom: 10px; }
+            .body-cell           { max-width: 320px; }
+        </style>
+    </ui:define>
+
+    <ui:define name="content">
+
+        <div class="card">
+            <h2>#{suggestionBean.editing ? 'Edit suggestion' : 'New suggestion'}</h2>
+
+            <h:outputText rendered="#{empty suggestionBean.categories}"
+                          value="Add at least one category before posting a suggestion."
+                          style="color:#b00020;"/>
+
+            <h:form id="suggestionForm" rendered="#{not empty suggestionBean.categories}">
+                <div class="grid">
+
+                    <h:outputLabel for="title" value="Title *"/>
+                    <span>
+                        <!-- standard validation: required + f:validateLength; HTML5 on the client -->
+                        <h:inputText id="title" label="Title" value="#{suggestionBean.selected.title}"
+                                     required="true" requiredMessage="Title is required."
+                                     validatorMessage="Title must be 5 to 120 characters."
+                                     pt:required="required" pt:minlength="5" pt:maxlength="120"
+                                     pt:placeholder="Short summary of your idea">
+                            <f:validateLength minimum="5" maximum="120"/>
+                        </h:inputText>
+                        <h:message for="title" styleClass="error"/>
+                    </span>
+
+                    <h:outputLabel for="body" value="Suggestion *"/>
+                    <span>
+                        <!-- Bean Validation @Size(min=10,max=1000) on the entity does the range check -->
+                        <h:inputTextarea id="body" label="Suggestion" rows="4" value="#{suggestionBean.selected.body}"
+                                         required="true" requiredMessage="Suggestion body is required."
+                                         pt:required="required" pt:maxlength="1000"/>
+                        <h:message for="body" styleClass="error"/>
+                    </span>
+
+                    <h:outputLabel for="email" value="Student e-mail *"/>
+                    <span>
+                        <!-- all three validation types on one field:
+                             required (standard) + @Email (Bean Validation) + custom validator -->
+                        <h:inputText id="email" label="Student e-mail" value="#{suggestionBean.selected.submitterEmail}"
+                                     required="true" requiredMessage="Student e-mail is required."
+                                     pt:type="email" pt:required="required"
+                                     pt:placeholder="name@student.ac.rw">
+                            <f:validator validatorId="studentEmailValidator"/>
+                        </h:inputText>
+                        <h:message for="email" styleClass="error"/>
+                    </span>
+
+                    <h:outputLabel for="category" value="Category *"/>
+                    <span>
+                        <h:selectOneMenu id="category" label="Category" value="#{suggestionBean.selected.category}"
+                                         converter="categoryConverter"
+                                         required="true" requiredMessage="A category must be selected.">
+                            <f:selectItem itemLabel="-- select --" itemValue="#{null}"/>
+                            <f:selectItems value="#{suggestionBean.categories}" var="c"
+                                           itemValue="#{c}" itemLabel="#{c.name}"/>
+                        </h:selectOneMenu>
+                        <h:message for="category" styleClass="error"/>
+                    </span>
+
+                    <h:outputLabel for="status" value="Status"/>
+                    <span>
+                        <h:selectOneMenu id="status" value="#{suggestionBean.selected.status}">
+                            <f:selectItems value="#{suggestionBean.statuses}"/>
+                        </h:selectOneMenu>
+                    </span>
+
+                    <div style="grid-column:2;">
+                        <h:commandButton value="#{suggestionBean.editing ? 'Update' : 'Submit'}"
+                                         action="#{suggestionBean.save}" styleClass="btn"/>
+                        <h:commandButton value="Cancel" action="#{suggestionBean.cancel}"
+                                         immediate="true" styleClass="btn btn-secondary"
+                                         style="margin-left:8px;" pt:formnovalidate="formnovalidate"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h2>Suggestions (#{suggestionBean.suggestions.size()})</h2>
+
+            <h:form id="suggestionListForm">
+                <div class="filter-bar">
+                    <h:outputLabel for="filter" value="Filter by status: " style="margin-right:6px;"/>
+                    <h:selectOneMenu id="filter" value="#{suggestionBean.statusFilter}"
+                                     style="width:auto; display:inline-block;">
+                        <f:selectItem itemLabel="All" itemValue=""/>
+                        <f:selectItems value="#{suggestionBean.statuses}"/>
+                    </h:selectOneMenu>
+                    <h:commandButton value="Apply" action="#{suggestionBean.applyFilter}"
+                                     styleClass="btn btn-secondary" style="margin-left:8px;"/>
+                </div>
+
+                <h:dataTable value="#{suggestionBean.suggestions}" var="s" styleClass="data-table"
+                             rendered="#{not empty suggestionBean.suggestions}">
+                    <h:column>
+                        <f:facet name="header">#</f:facet>
+                        #{s.id}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Title</f:facet>
+                        #{s.title}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Suggestion</f:facet>
+                        <h:outputText value="#{s.body}" styleClass="body-cell"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Category</f:facet>
+                        #{s.category.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Student</f:facet>
+                        #{s.submitterEmail}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Status</f:facet>
+                        <h:outputText value="#{s.status}" styleClass="status status-#{s.status}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Posted</f:facet>
+                        <h:outputText value="#{s.createdAt}">
+                            <f:convertDateTime type="localDateTime" pattern="yyyy-MM-dd HH:mm"/>
+                        </h:outputText>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Actions</f:facet>
+                        <h:commandLink value="Edit" action="#{suggestionBean.edit(s)}"/>
+                        <h:outputText value=" | "/>
+                        <h:commandLink value="Delete" action="#{suggestionBean.delete(s)}"
+                                       onclick="return confirm('Delete this suggestion?');"/>
+                    </h:column>
+                </h:dataTable>
+
+                <h:outputText value="No suggestions yet." rendered="#{empty suggestionBean.suggestions}"
+                              style="color:#777;"/>
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
