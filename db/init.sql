@@ -1,5 +1,5 @@
 -- Runs once, the first time the postgres volume is created.
--- Schema matches the Hibernate hbm.xml mappings; hibernate.hbm2ddl.auto=update
+-- Schema matches the JPA entities in rw.ac.suggestionbox.domain; ddl-auto=update
 -- will simply find the tables already in place.
 
 CREATE TABLE IF NOT EXISTS categories (

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{})}"></head>
+<body>
+<div th:replace="~{fragments/layout :: topbar}"></div>
+
+<div class="page">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="card">
+        <h2>Welcome</h2>
+        <!-- 3. INLINE CSS -->
+        <p style="margin:0 0 10px 0; line-height:1.5;">
+            A minimal Spring Boot application where students post suggestions and staff
+            manage them. Two entities support full CRUD: <strong>Category</strong> and
+            <strong>Suggestion</strong>.
+        </p>
+        <p style="margin:0;">
+            <a th:href="@{/categories}" class="btn"
+               style="text-decoration:none; display:inline-block;">Manage Categories</a>
+            <a th:href="@{/suggestions}" class="btn"
+               style="text-decoration:none; display:inline-block; margin-left:8px;">Manage Suggestions</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

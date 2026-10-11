@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::style})}">
+    <!-- 2. INTERNAL CSS (page specific) -->
+    <style>
+        .status              { font-size: 12px; padding: 2px 6px; border: 1px solid #b9bfc9; }
+        .status-NEW          { background: #eef3fb; }
+        .status-UNDER_REVIEW { background: #fdf6e3; }
+        .status-ACCEPTED     { background: #eaf6ec; }
+        .status-REJECTED     { background: #fbeeee; }
+        .filter-bar          { margin-bottom: 10px; }
+        .body-cell           { max-width: 320px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: topbar}"></div>
+
+<div class="page">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="card">
+        <h2 th:text="${form.editing} ? 'Edit suggestion' : 'New suggestion'">New suggestion</h2>
+
+        <span th:if="${#lists.isEmpty(categories)}" style="color:#b00020;">
+            Add at least one category before posting a suggestion.
+        </span>
+
+        <!-- Server-side: Bean Validation on SuggestionForm (@NotBlank, @Size, @Email, @StudentEmail).
+             Client-side: HTML5 constraints. -->
+        <form th:unless="${#lists.isEmpty(categories)}" th:object="${form}" method="post"
+              th:action="${form.editing} ? @{/suggestions/{id}(id=${form.id})} : @{/suggestions}">
+            <div class="grid">
+
+                <label for="title">Title *</label>
+                <span>
+                    <input type="text" th:field="*{title}" th:errorclass="field-error"
+                           required minlength="5" maxlength="120" placeholder="Short summary of your idea"/>
+                    <span class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+                </span>
+
+                <label for="body">Suggestion *</label>
+                <span>
+                    <textarea th:field="*{body}" th:errorclass="field-error"
+                              rows="4" required maxlength="1000"></textarea>
+                    <span class="error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}"></span>
+                </span>
+
+                <label for="submitterEmail">Student e-mail *</label>
+                <span>
+                    <input type="email" th:field="*{submitterEmail}" th:errorclass="field-error"
+                           required placeholder="name@student.ac.rw"/>
+                    <span class="error" th:if="${#fields.hasErrors('submitterEmail')}" th:errors="*{submitterEmail}"></span>
+                </span>
+
+                <label for="categoryId">Category *</label>
+                <span>
+                    <select th:field="*{categoryId}" th:errorclass="field-error" required>
+                        <option value="">-- select --</option>
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}">Category</option>
+                    </select>
+                    <span class="error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></span>
+                </span>
+
+                <label for="status">Status</label>
+                <span>
+                    <select th:field="*{status}">
+                        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}">NEW</option>
+                    </select>
+                </span>
+
+                <div style="grid-column:2;">
+                    <button type="submit" class="btn" th:text="${form.editing} ? 'Update' : 'Submit'">Submit</button>
+                    <a th:href="@{/suggestions}" class="btn btn-secondary"
+                       style="margin-left:8px; text-decoration:none; display:inline-block;">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 th:text="|Suggestions (${#lists.size(suggestions)})|">Suggestions</h2>
+
+        <form class="filter-bar" method="get" th:action="@{/suggestions}">
+            <label for="filter" style="margin-right:6px;">Filter by status: </label>
+            <select id="filter" name="status" style="width:auto; display:inline-block;">
+                <option value="">All</option>
+                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"
+                        th:selected="${st == filter}">NEW</option>
+            </select>
+            <button type="submit" class="btn btn-secondary" style="margin-left:8px;">Apply</button>
+        </form>
+
+        <table class="data-table" th:unless="${#lists.isEmpty(suggestions)}">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Suggestion</th>
+                <th>Category</th>
+                <th>Student</th>
+                <th>Status</th>
+                <th>Posted</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${suggestions}">
+                <td th:text="${s.id}">1</td>
+                <td th:text="${s.title}">Title</td>
+                <td><span class="body-cell" th:text="${s.body}">Body</span></td>
+                <td th:text="${s.category.name}">Category</td>
+                <td th:text="${s.submitterEmail}">name@student.ac.rw</td>
+                <td><span th:text="${s.status}" th:class="|status status-${s.status}|">NEW</span></td>
+                <td th:text="${#temporals.format(s.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 10:00</td>
+                <td>
+                    <a th:href="@{/suggestions/{id}/edit(id=${s.id})}">Edit</a>
+                    |
+                    <form class="inline-form" method="post" th:action="@{/suggestions/{id}/delete(id=${s.id})}"
+                          onsubmit="return confirm('Delete this suggestion?');">
+                        <button type="submit" class="link-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <span th:if="${#lists.isEmpty(suggestions)}" style="color:#777;">No suggestions yet.</span>
+    </div>
+</div>
+</body>
+</html>

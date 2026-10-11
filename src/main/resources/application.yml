@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: suggestionbox
+
+  # Same DB_URL / DB_USER / DB_PASSWORD variables as before, with local defaults.
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/suggestionbox}
+    username: ${DB_USER:suggestion}
+    password: ${DB_PASSWORD:suggestion}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      # db/init.sql owns the schema; update only fills gaps on a fresh local database.
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.hibernate.SQL: debug

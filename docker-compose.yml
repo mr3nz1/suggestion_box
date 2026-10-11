@@ -2,7 +2,6 @@ services:
   db:
     image: postgres:16-alpine
     container_name: suggestionbox-db
-    pull_policy: missing          # never reach out to a registry if the image is local
     environment:
       POSTGRES_DB: suggestionbox
       POSTGRES_USER: suggestion
@@ -19,12 +18,9 @@ services:
       retries: 10
 
   app:
-    build:
-      context: .
-      pull: false               # use the local base images, do not check the registry
+    build: .
     image: suggestionbox-app:1.0
     container_name: suggestionbox-app
-    pull_policy: missing
     environment:
       DB_URL: jdbc:postgresql://db:5432/suggestionbox
       DB_USER: suggestion

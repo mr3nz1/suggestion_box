@@ -1,15 +1,16 @@
-# ---- build stage: produce the WAR, fully offline ----
-# Dependencies are vendored in .m2repo, so Maven runs with -o (offline) and never
-# contacts Maven Central. Requires only the two base images to be present locally.
+# ---- build stage: executable Spring Boot jar ----
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /build
-COPY .m2repo /m2repo
 COPY pom.xml .
+RUN mvn -B -q dependency:go-offline
 COPY src ./src
-RUN mvn -B -o -Dmaven.repo.local=/m2repo clean package
+RUN mvn -B -q -DskipTests package
 
-# ---- runtime stage: Tomcat 10.1 (Jakarta EE 10 namespace) ----
-FROM tomcat:10.1-jdk21-temurin
-RUN rm -rf /usr/local/tomcat/webapps/*
-COPY --from=build /build/target/suggestionbox.war /usr/local/tomcat/webapps/ROOT.war
+# ---- runtime stage: JRE only, non-root ----
+FROM eclipse-temurin:21-jre
+RUN useradd --system --uid 1001 app
+USER app
+WORKDIR /app
+COPY --from=build /build/target/suggestionbox.jar app.jar
 EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Shared <head>: pass the page's internal <style> block, or ~{} for none. -->
+<head th:fragment="head(pageStyle)">
+    <meta charset="UTF-8"/>
+    <title>Student Suggestion Box</title>
+    <!-- 1. EXTERNAL CSS -->
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <th:block th:replace="${pageStyle}"/>
+</head>
+
+<body>
+
+<div class="topbar" th:fragment="topbar">
+    <h1>Student Suggestion Box</h1>
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/categories}">Categories</a>
+    <a th:href="@{/suggestions}">Suggestions</a>
+</div>
+
+<!-- Flash messages set by controllers after a redirect. -->
+<ul class="messages" th:fragment="messages" th:if="${success != null or error != null}">
+    <li class="info" th:if="${success}" th:text="${success}">Saved.</li>
+    <li class="error" th:if="${error}" th:text="${error}">Failed.</li>
+</ul>
+
+</body>
+</html>

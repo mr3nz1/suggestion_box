@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::style})}">
+    <!-- 2. INTERNAL CSS (page specific) -->
+    <style>
+        .cat-inactive { color: #777; font-style: italic; }
+        .col-narrow   { width: 90px; }
+        .form-actions { grid-column: 2; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: topbar}"></div>
+
+<div class="page">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="card">
+        <h2 th:text="${form.editing} ? 'Edit category' : 'New category'">New category</h2>
+
+        <!-- Server-side: Bean Validation on CategoryForm (@NotBlank, @Size, @UniqueCategoryName).
+             Client-side: HTML5 constraints. -->
+        <form th:object="${form}" method="post"
+              th:action="${form.editing} ? @{/categories/{id}(id=${form.id})} : @{/categories}">
+            <div class="grid">
+
+                <label for="name">Name *</label>
+                <span>
+                    <input type="text" th:field="*{name}" th:errorclass="field-error"
+                           required minlength="3" maxlength="60" placeholder="e.g. Library Services"/>
+                    <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                </span>
+
+                <label for="description">Description</label>
+                <span>
+                    <textarea th:field="*{description}" th:errorclass="field-error"
+                              rows="3" maxlength="255"></textarea>
+                    <span class="error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+                </span>
+
+                <label for="active1">Active</label>
+                <span style="justify-self:start;">
+                    <input type="checkbox" th:field="*{active}"/>
+                </span>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn" th:text="${form.editing} ? 'Update' : 'Create'">Create</button>
+                    <a th:href="@{/categories}" class="btn btn-secondary"
+                       style="margin-left:8px; text-decoration:none; display:inline-block;">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 th:text="|Categories (${#lists.size(categories)})|">Categories</h2>
+
+        <table class="data-table" th:unless="${#lists.isEmpty(categories)}">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${categories}">
+                <td th:text="${c.id}">1</td>
+                <td><span th:text="${c.name}" th:classappend="${c.active} ? '' : 'cat-inactive'">Name</span></td>
+                <td th:text="${c.description}"></td>
+                <td th:text="${c.active} ? 'Yes' : 'No'">Yes</td>
+                <td>
+                    <a th:href="@{/categories/{id}/edit(id=${c.id})}">Edit</a>
+                    |
+                    <form class="inline-form" method="post" th:action="@{/categories/{id}/delete(id=${c.id})}"
+                          onsubmit="return confirm('Delete this category?');">
+                        <button type="submit" class="link-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <span th:if="${#lists.isEmpty(categories)}" style="color:#777;">No categories yet.</span>
+    </div>
+</div>
+</body>
+</html>
